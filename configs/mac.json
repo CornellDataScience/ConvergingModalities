@@ -1,0 +1,18 @@
+{
+  "dataset": "minhuh/prh",
+  "dataset_revision": "wit_1024",
+  "caption_index": 0,
+  "seed": 20240927,
+  "k": 10,
+  "clip_quantile": 0.95,
+  "clip_mode": "upstream_default",
+  "concatenate_layers": false,
+  "dtype": "float32",
+  "models": [
+    {"id": "bigscience/bloomz-560m", "modality": "language"},
+    {"id": "bigscience/bloomz-1b1", "modality": "language"},
+    {"id": "bigscience/bloomz-1b7", "modality": "language"},
+    {"id": "timm/vit_small_patch14_dinov2.lvd142m", "modality": "vision"},
+    {"id": "timm/vit_base_patch14_dinov2.lvd142m", "modality": "vision"}
+  ]
+}
