@@ -1,0 +1,23 @@
+{
+  "seed": 20261015,
+  "pilot": {"train": ["banana", "alarm clock"], "validation": ["moon"], "test": ["sock"], "instances": 12, "dimensions": 8},
+  "main": {
+    "train": ["airplane", "apple", "bicycle", "chair", "cup", "fish", "house", "tree"],
+    "validation": ["book", "car", "flower", "guitar"],
+    "test": ["bird", "butterfly", "candle", "scissors", "cloud", "crown", "hat", "key", "ladder", "mushroom", "star", "umbrella"],
+    "instances": 40, "dimensions": 32
+  },
+  "recognized_pool": 400,
+  "templates": ["a {color} drawing of a {category}", "a sketch of a {category} in {color}", "a {category} drawn with {color} lines", "a {color} line drawing of a {category}"],
+  "colors": {"red": [200, 40, 40], "blue": [40, 40, 200]},
+  "scales": [0, 0.25, 0.5, 1, 2, 4],
+  "ridge_alpha": 1.0,
+  "random_controls": 100,
+  "bootstrap_draws": 20000,
+  "minimum_meaningful_margin": 0.02,
+  "category_preservation_tolerance": 0.05,
+  "primary_language": "bigscience/bloomz-1b7",
+  "primary_vision": "timm/vit_base_patch14_dinov2.lvd142m",
+  "language_layer": 19,
+  "vision_layer": 10
+}

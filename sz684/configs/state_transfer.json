@@ -1,0 +1,24 @@
+{
+  "seed": 20261016,
+  "relations": [
+    {"name": "cleaning", "source": "dirty", "target": "clean"},
+    {"name": "cooking", "source": "raw", "target": "cooked"},
+    {"name": "ripening", "source": "unripe", "target": "ripe"},
+    {"name": "thawing", "source": "frozen", "target": "thawed"},
+    {"name": "drying", "source": "wet", "target": "dry"}
+  ],
+  "minimum_available_images": 10,
+  "images_per_composition": 8,
+  "folds": 5,
+  "dimensions": 64,
+  "templates": ["a photo of a {state} {noun}", "an image of a {state} {noun}", "a {noun} that is {state}", "a picture showing a {state} {noun}"],
+  "scales": [0, 0.25, 0.5, 1, 2, 4],
+  "ridge_alpha": 1.0,
+  "random_controls": 100,
+  "bootstrap_draws": 20000,
+  "category_preservation_tolerance": 0.05,
+  "primary_language": "bigscience/bloomz-1b7",
+  "primary_vision": "timm/vit_base_patch14_dinov2.lvd142m",
+  "language_layer": 19,
+  "vision_layer": 10
+}

@@ -1,0 +1,9 @@
+# Natural-state data audit
+
+October 15,2026. Before inspecting state-transfer scores, contact sheets exposed ambiguities in released MIT-States labels. The archive README says Bing-query results were human-cleaned but still contain mislabeled/ambiguous images. This differs from an independently verified state-transition annotation. Human-ranked state annotations described in the paper are not included in this release ZIP (it contains images, README.txt and adj_ants.csv).
+
+Concrete examples visible in the sampled sheets include “thawed beef/chicken” containing cooked dishes, “unripe tomato” containing ripe-looking fruit or another fruit, “wet foam” containing product photos, and generic object images where the claimed wet/dry state cannot be confirmed. These observations are a visual QA finding by this agent, not a complete human reannotation or an estimated error rate. No image was excluded based on this inspection or on a model score; the frozen sample is preserved.
+
+Main analysis therefore evaluates **retrieval of released state/noun labels**. It does not validate physical state, causal transitions or a controlled state intervention. Source and target pictures need not show the same physical instance. A stronger semantic claim requires a distinct verified-label evaluation. Existing ChangeIt object-state golden subsets and STATUS Bench are candidates; the latter requires Ego4D image access and its release procedure.
+
+Original archive members are validated with ZIP CRC32, length and per-image SHA256. Eight repeated CRC/length archive entries were removed deterministically before sampling; selected992 images have distinct SHA256 values. This does not exclude near duplicates or shared web sources. Exact noun labels are split globally; labels such as fish/salmon/seafood and fruit/apple are not taxonomically disjoint. The effective external-validity limit is the fixed noun-label roster, not all possible objects or actions.

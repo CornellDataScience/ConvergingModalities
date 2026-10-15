@@ -1,3 +1,5 @@
+> Historical proposal/report. The active natural-state study and results are in [STATE_TRANSFER_PAPER.md](STATE_TRANSFER_PAPER.md) and [CURRENT_DIRECTION.md](CURRENT_DIRECTION.md). The red-to-blue main experiment was retired at the user's request.
+
 # Next experiment: repeated semantic relations across modalities
 
 The completed pilot in results/difference_transfer/ tests arbitrary held-out endpoint differences. It does not yet test the user's stronger related-concept hypothesis.
@@ -21,3 +23,5 @@ Evaluation:
 Use source↔target reversal and a second relation only after the first protocol is fixed. Do not infer compositional semantics from successful endpoint mapping alone.
 
 Current blocker for this specific semantic experiment: the cached WIT pairs have no verified repeated-relation annotations. Keyword inspection produced ambiguous names and captions rather than a controlled relation dataset. No images or relation labels have been fabricated. Benchmark curation is the next substantive task.
+
+October 15 follow-up: `RESEARCH_REVIEW.md` assesses this direction and reports a new three-split endpoint audit. `SEMANTIC_PROTOCOL.md` expands the benchmark into a proposed controlled intervention study, with explicit category splits, controls, uncertainty and object-preservation criteria. The benchmark remains unrun. `PAPER_DRAFT.md` presents the current exploratory result without claiming semantic transfer.

@@ -77,3 +77,41 @@ Verify the first pilot pair against the upstream-style causal language model and
 ```sh
 .venv/bin/python verify_extraction.py --run results/pilot --device mps
 ```
+
+## October 15 research review and vector explorer
+
+- `RESEARCH_REVIEW.md`: strengths, weaknesses, current claim boundaries, and chosen research direction.
+- `PAPER_DRAFT.md`: exploratory working manuscript; semantic intervention results remain unrun.
+- `SEMANTIC_PROTOCOL.md`: proposed category-held-out red→blue intervention benchmark and success criteria.
+- `ENDPOINT_AUDIT_PROTOCOL.md`: fixed exploratory extension to the existing transfer pilot.
+
+From this directory, run `.venv/bin/python endpoint_audit.py` to reproduce the three-split endpoint contribution audit and generate `results/endpoint_audit/explorer.html`. Open that self-contained file in a browser. The explorer supports pair selection, cosine ordering, nearest-candidate highlighting and optional mean vectors. Display coordinates use a joint 2D SVD; all scores use 128 dimensions. Requires the existing baseline feature cache and saved held-out/transfer results. Earlier results are preserved; reruns replace only the audit output directory. Generated results are Git-ignored and must be archived separately when sharing.
+
+## Active paper: natural object-state retrieval
+
+The technical manuscript is `STATE_TRANSFER_PAPER.md`, rendered as `output/pdf/state_transfer_paper.pdf`. It asks whether **state-change directions estimated from text can transfer to images of held-out object categories**, through a supervised bridge between separately pretrained encoders. Across five changes, first-result state-and-category success is 38.7%, versus 20.9% for image similarity search given no change instruction and 42.1% for direct target-text search. Category retention falls from 86.6% to 79.4%, failing the original preservation requirement. First-result success leads the revised presentation; AP remains the originally specified statistical outcome. Released-label noise and lexical rather than taxonomic holdout limit the claim.
+
+The color-sketch main study was retired at the user's request and interrupted before test scoring. `CURRENT_DIRECTION.md` is authoritative over earlier red→blue proposals.
+
+Run the natural-state pipeline from this directory:
+
+```bash
+.venv/bin/python state_data.py
+.venv/bin/python state_extract.py --modality language
+.venv/bin/python state_extract.py --modality vision
+.venv/bin/python state_analysis.py
+.venv/bin/python state_identity_followup.py
+.venv/bin/python state_report.py
+.venv/bin/python -m pytest -q
+```
+
+`state_extract.py` uses the Mac GPU by default and pinned cached model weights. `state_data.py` selectively reads the original public archive and verifies ZIP CRC/length and SHA256. Results, original images, source snapshots, design locks, fitted-fold identities, validation curves, per-query data and bootstrap draws are under `results/state_transfer/` (Git-ignored). `STATE_TRANSFER_PROTOCOL.md` specifies the primary experiment; `STATE_FOLLOWUP_PROTOCOL.md` labels the post-primary exploration; `STATE_DATA_AUDIT.md` records label limitations. `paper_pdf.py` renders the manuscript using ReportLab from the bundled PDF runtime, which is separate from the analysis virtual environment.
+
+The saved `results/state_transfer/vectors.npz` contains64D source/target image vectors and transferred directions for a later3D explorer. The source and target natural images are independent examples, so their array indices must not be presented as matched counterfactual pairs.
+
+### Second paper version
+
+`STATE_TRANSFER_PAPER_V2.md` explains the same study in more approachable technical prose, with definitions, examples, and exact methods/statistics in appendices. Its PDF is `output/pdf/state_transfer_paper_v2.pdf`. Both versions now foreground the cross-modal question, the actual held-out cooking split, and the limits of the baseline comparisons. To rebuild the second PDF with the bundled ReportLab runtime, run `paper_pdf.py --source STATE_TRANSFER_PAPER_V2.md --output output/pdf/state_transfer_paper_v2.pdf --title 'Can a Change Learned in Words Transfer to New Images?'`.
+
+
+The two manuscripts are edited separately. `state_report.py` regenerates figures, the companion report, and an archival generated draft under `results/state_transfer/GENERATED_MANUSCRIPT.md`; it does not overwrite the editorial manuscripts. Rebuild the technical PDF with `paper_pdf.py --title 'Do State-Change Directions Transfer from Text to Images?'` using the bundled ReportLab runtime.
