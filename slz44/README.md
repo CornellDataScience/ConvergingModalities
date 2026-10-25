@@ -89,6 +89,29 @@ shuffled null (108/108).
 - **The model-size trend is fragile.** The number of strict increases across BLOOMZ sizes changes
   from condition to condition, so conclusions about scaling depend on preprocessing.
 
+## State-transfer preprocessing study
+
+A second experiment asks whether the same preprocessing choices change text-to-image **state
+transfer** (learning "raw to cooked" from text about some objects, then using it to retrieve images
+of held-out objects). It uses its own MIT-States sample and independent code.
+
+| Path | Purpose |
+|---|---|
+| `STATE_CONTROLS_PROTOCOL.md` | design, six preprocessing conditions, sanity gate, limits |
+| `states_data.py` | image selection and feature-cache I/O |
+| `states_extract.py` | selects images from the MIT-States archive and extracts features |
+| `state_transfer.py` | the experiment (numpy only) |
+| `tests/test_state_transfer.py` | tests on synthetic data |
+
+```sh
+# Download the MIT-States release archive first (see the dataset page), then:
+python states_extract.py --zip path/to/release_dataset.zip --run data/states --device cpu
+python state_transfer.py --run data/states --out results/state_controls
+```
+
+Feature extraction for about 1,000 images and 500 prompts is resumable; DINOv2 on CPU is the slow
+step. Results are exploratory (see the protocol).
+
 ## Limitations
 
 - The 18 comparisons share models and use overlapping splits, so they are not independent
@@ -169,3 +192,9 @@ also record SHA-256 hashes of the code, protocol and held-out file used.
 - Repeat the controls with CKA and Gromov-Wasserstein-based measures, not only mutual k-NN.
 - Test larger sample sizes, which needs a larger paired dataset than 1,024 pairs.
 - Add further model families and sizes.
+
+## Metric sensitivity
+
+`metric_controls.py` re-scores the anisotropy conditions with linear CKA, Gromov-Wasserstein structure cost, and (optionally, `--gw-match`) GW blind matching, using `extra_metrics.py`. Protocol: `METRIC_CONTROLS_PROTOCOL.md`. `state_compare.py` compares the state-transfer gain across preprocessing conditions.
+
+    python metric_controls.py --gw-match
