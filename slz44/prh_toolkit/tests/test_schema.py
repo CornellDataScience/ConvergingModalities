@@ -3,7 +3,7 @@ import math
 import pytest
 import prh
 from prh.__main__ import main as cli
-from convert_slz44 import categories, scale_grid
+from convert_slz44 import categories, scale_grid, state_matrix
 
 
 @pytest.fixture
@@ -71,3 +71,10 @@ def test_converters_produce_valid_documents(protocol):
     doc = categories(cats, protocol, commit='abc1234')
     assert prh.validate(doc) == [] and doc['records'][0]['relation'] == 'cooking'
     assert all(math.isfinite(r['value']) for r in doc['records'])
+
+
+def test_state_matrix_converter(protocol):
+    results = dict(summary={'reference': dict(matrix_text=[[0.5 if i == j else 0.1 for j in range(5)] for i in range(5)])})
+    doc = state_matrix(results, protocol, commit='abc1234')
+    assert prh.validate(doc) == [] and len(doc['records']) == 25
+    assert doc['records'][0]['extra']['visual_relation'] == 'cleaning'

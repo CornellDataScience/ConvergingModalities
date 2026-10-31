@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRH results viewer</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f6f7f9;--panel:#fff;--ink:#14181f;--muted:#586170;--line:#dde1e8;--grid:#eceff3;--accent:#2a78d6;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;--s7:#6250d6;--s8:#e34948;--base:#7a8290;
+  --div-neutral:#f0efec;--div-pos:#1c5cab;--div-neg:#c23b3b;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#11141a;--panel:#1a1e25;--ink:#eceff4;--muted:#9ba5b4;--line:#2b313b;--grid:#232932;--accent:#3987e5;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300;--s7:#9085e9;--s8:#e66767;--base:#8a93a1;
+  --div-neutral:#383835;--div-pos:#3987e5;--div-neg:#e66767;}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#11141a;--panel:#1a1e25;--ink:#eceff4;--muted:#9ba5b4;--line:#2b313b;--grid:#232932;--accent:#3987e5;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300;--s7:#9085e9;--s8:#e66767;--base:#8a93a1;
+  --div-neutral:#383835;--div-pos:#3987e5;--div-neg:#e66767;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:1040px;margin:0 auto;padding:28px 16px 64px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:6px}
+h1{font-size:30px;line-height:1.15;margin:0 0 6px;font-weight:650;letter-spacing:-.015em}
+p.lead{margin:0 0 18px;color:var(--muted);max-width:62ch}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+button,select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+button:hover,select:hover{border-color:var(--accent)}
+button:focus-visible,select:focus-visible,.drop:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.drop{border:1.5px dashed var(--line);border-radius:10px;padding:10px 14px;color:var(--muted);flex:1;min-width:240px;text-align:center;cursor:pointer}
+.drop.over{border-color:var(--accent);color:var(--ink)}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
+.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;padding:9px 14px;color:var(--muted);white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+.card h2{font-size:17px;margin:0 0 4px;font-weight:620}
+.note{color:var(--muted);font-size:13px;margin:6px 0 0;max-width:80ch}
+.files{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding:0;list-style:none}
+.files li{font-size:12.5px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--muted)}
+.err{color:var(--div-neg);font-size:13px;margin:4px 0}
+svg{width:100%;height:auto;display:block}
+svg text{fill:var(--muted);font:12px "Segoe UI Variable Text","Segoe UI",system-ui,sans-serif}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0 0}
+.legend button{border:0;background:none;padding:2px 4px;display:flex;align-items:center;gap:6px;font-size:13px}
+.legend button[aria-pressed="false"]{opacity:.35}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+.scroll{overflow-x:auto}
+.empty{color:var(--muted);padding:12px 0}
+/* robustness matrix */
+.rob{border-collapse:separate;border-spacing:3px;width:auto;min-width:100%}
+.rob th,.rob td{border:0;padding:0;text-align:center}
+.rob thead th{color:var(--muted);font-weight:500;font-size:12.5px;padding:2px 0 4px}
+.rob thead tr:first-child th{font-size:13px;color:var(--ink);font-weight:600;border-bottom:1px solid var(--line);padding-bottom:5px}
+.rob th.rowh{text-align:left;padding-right:14px;white-space:nowrap}
+.rob th.rowh .nm{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--ink)}
+.rob th.rowh .sub{display:block;margin-left:20px;font-size:12px;color:var(--muted);font-weight:400}
+.cell{display:block;width:100%;min-width:58px;height:40px;border:0;border-radius:7px;font:600 13px/1 inherit;padding:0;cursor:pointer;transition:transform .08s}
+.cell:hover{transform:scale(1.06);outline:2px solid var(--ink);outline-offset:1px}
+.cell[disabled]{cursor:default;background:var(--grid)!important;color:var(--muted)!important}
+.key{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin:12px 0 0}
+.key .ramp{height:10px;width:180px;border-radius:5px}
+.reading{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+.reading li{display:flex;gap:8px;align-items:baseline;font-size:14px}
+.flow path{transition:opacity .15s}
+.flow .node{cursor:default}
+code{font-size:12.5px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>What survives which choice</h1>
+      <p class="lead">Each result is re-checked under every preprocessing control, alignment metric and sample size. Drop your results files to replace the sample.</p>
+    </div>
+    <button id="theme" type="button" aria-label="Switch colour theme">Theme: auto</button>
+  </header>
+  <div class="bar">
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose or drop results files">Drop results .json files here, or click to choose</div>
+    <input type="file" id="picker" accept=".json,application/json" multiple hidden>
+    <button id="sample" type="button">Load sample</button>
+    <button id="clear" type="button">Clear</button>
+  </div>
+  <ul class="files" id="files"></ul>
+  <div id="errors"></div>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div id="view"></div>
+</main>
+<script>
+"use strict";
+const SAMPLE_NOTE = "Sample: means and ranges copied from reports/scale-grid-test-1 and reports/state-directions-test-1 (18 held-out comparisons per cell). Load your own results files to replace it.";
+// [metric, condition, n, mean, low, high]
+const SAMPLE_GRID = [
+["knn_excess_fixed_k","baseline",128,.1403,.1078,.1838],["knn_excess_fixed_k","baseline",256,.1197,.1002,.1347],["knn_excess_fixed_k","baseline",512,.1047,.0915,.1276],
+["knn_excess_fixed_k","center",128,.1605,.1145,.2099],["knn_excess_fixed_k","center",256,.1362,.1112,.1680],["knn_excess_fixed_k","center",512,.1169,.0969,.1444],
+["knn_excess_fixed_k","pca128",128,.1646,.1166,.2105],["knn_excess_fixed_k","pca128",256,.1390,.1043,.1628],["knn_excess_fixed_k","pca128",512,.1145,.0989,.1339],
+["knn_excess_fixed_k","standardize",128,.1583,.1130,.2155],["knn_excess_fixed_k","standardize",256,.1338,.1106,.1634],["knn_excess_fixed_k","standardize",512,.1165,.0983,.1462],
+["knn_excess_fixed_k","remove3",128,.1199,.0749,.1710],["knn_excess_fixed_k","remove3",256,.1207,.0954,.1678],["knn_excess_fixed_k","remove3",512,.1118,.0898,.1495],
+["knn_excess_fixed_k","pca128_whiten",128,.0858,.0385,.1195],["knn_excess_fixed_k","pca128_whiten",256,.0973,.0680,.1412],["knn_excess_fixed_k","pca128_whiten",512,.1000,.0714,.1350],
+["knn_excess_scaled_k","baseline",128,.0791,.0477,.1332],["knn_excess_scaled_k","baseline",256,.0978,.0803,.1203],["knn_excess_scaled_k","baseline",512,.1047,.0915,.1276],
+["knn_excess_scaled_k","center",128,.0969,.0584,.1332],["knn_excess_scaled_k","center",256,.1117,.0862,.1530],["knn_excess_scaled_k","center",512,.1169,.0969,.1444],
+["knn_excess_scaled_k","pca128",128,.0967,.0578,.1604],["knn_excess_scaled_k","pca128",256,.1101,.0868,.1398],["knn_excess_scaled_k","pca128",512,.1145,.0989,.1339],
+["knn_excess_scaled_k","standardize",128,.0982,.0628,.1281],["knn_excess_scaled_k","standardize",256,.1107,.0903,.1553],["knn_excess_scaled_k","standardize",512,.1165,.0983,.1462],
+["knn_excess_scaled_k","remove3",128,.0918,.0555,.1403],["knn_excess_scaled_k","remove3",256,.1057,.0848,.1585],["knn_excess_scaled_k","remove3",512,.1118,.0898,.1495],
+["knn_excess_scaled_k","pca128_whiten",128,.0833,.0384,.1361],["knn_excess_scaled_k","pca128_whiten",256,.0949,.0710,.1422],["knn_excess_scaled_k","pca128_whiten",512,.1000,.0714,.1350],
+["cka_excess","baseline",128,.2286,.1108,.2845],["cka_excess","baseline",256,.2529,.1292,.2937],["cka_excess","baseline",512,.2798,.1695,.3333],
+["cka_excess","center",128,.2310,.1117,.2886],["cka_excess","center",256,.2576,.1307,.2990],["cka_excess","center",512,.2821,.1686,.3306],
+["cka_excess","pca128",128,.2786,.1375,.3327],["cka_excess","pca128",256,.2906,.1542,.3307],["cka_excess","pca128",512,.3019,.1854,.3495],
+["cka_excess","standardize",128,.2133,.1130,.2705],["cka_excess","standardize",256,.2403,.1353,.2830],["cka_excess","standardize",512,.2660,.1741,.3200],
+["cka_excess","remove3",128,.0891,.0581,.1161],["cka_excess","remove3",256,.1118,.0657,.1269],["cka_excess","remove3",512,.1314,.0827,.1458],
+["cka_excess","pca128_whiten",128,.0566,.0262,.0814],["cka_excess","pca128_whiten",256,.0749,.0514,.1063],["cka_excess","pca128_whiten",512,.0901,.0659,.1152],
+["gw_cost_reduction","baseline",128,.2579,.1279,.3514],["gw_cost_reduction","baseline",256,.2285,.1318,.2991],["gw_cost_reduction","baseline",512,.2294,.1446,.2989],
+["gw_cost_reduction","center",128,.2524,.1844,.3342],["gw_cost_reduction","center",256,.2442,.1761,.3234],["gw_cost_reduction","center",512,.2449,.1735,.3158],
+["gw_cost_reduction","pca128",128,.3026,.1774,.3585],["gw_cost_reduction","pca128",256,.2925,.1709,.3482],["gw_cost_reduction","pca128",512,.2906,.1892,.3364],
+["gw_cost_reduction","standardize",128,.2519,.1923,.3285],["gw_cost_reduction","standardize",256,.2424,.1859,.3157],["gw_cost_reduction","standardize",512,.2434,.1822,.3089],
+["gw_cost_reduction","remove3",128,.1333,.0876,.1711],["gw_cost_reduction","remove3",256,.1312,.0847,.1632],["gw_cost_reduction","remove3",512,.1335,.1034,.1621],
+["gw_cost_reduction","pca128_whiten",128,.1017,.0498,.1426],["gw_cost_reduction","pca128_whiten",256,.1034,.0714,.1465],["gw_cost_reduction","pca128_whiten",512,.1076,.0796,.1360]];
+const SAMPLE_REL = ["cleaning","cooking","ripening","thawing","drying"];
+const SAMPLE_MATRIX = [[.396,.024,.016,.107,.071],[.041,.419,-.091,.562,-.036],[.058,-.136,.400,-.184,.107],[.100,.405,-.123,.628,-.021],[.127,-.017,.054,-.023,.217]];
+
+const LABELS = {knn_excess_fixed_k:"k-NN excess over null, k = 10", knn_excess_scaled_k:"k-NN excess over null, k scaled with N",
+  cka_excess:"CKA excess over null", gw_cost_reduction:"Gromov-Wasserstein cost reduction vs null",
+  state_direction_cos_own:"Cosine with own relation", state_direction_margin:"Margin over other relations",
+  state_direction_top1:"Top-1 relation match", state_direction_matrix_cos:"Alignment matrix cosine"};
+const SHORT = {knn_excess_fixed_k:"k-NN (k = 10)", knn_excess_scaled_k:"k-NN (k scaled)", cka_excess:"CKA", gw_cost_reduction:"Gromov-Wasserstein"};
+// each condition keeps its colour whatever else is shown (fixed slots, never reassigned by rank)
+const SLOTS = {center:1, pca128:2, standardize:3, remove3:4, pca128_whiten:5};
+const state = {runs:[], hidden:new Set(), view:"overview", metric:null, cond:null, band:true, errors:[], theme:"auto", extra:{}};
+const $ = id => document.getElementById(id);
+const NS = "http://www.w3.org/2000/svg";
+const fmt = v => (Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(3));
+const pct = v => (v >= 0 ? "+" : "−") + Math.abs(v * 100).toFixed(0) + "%";
+
+function check(doc){
+  const e = [];
+  if(!doc || typeof doc !== "object") return ["not a JSON object"];
+  if(doc.schema_version !== "0.1") e.push("schema_version must be \"0.1\"");
+  if(!Array.isArray(doc.records)) return e.concat("records must be a list");
+  for(let i = 0; i < Math.min(doc.records.length, 5000); i++){
+    const r = doc.records[i];
+    if(!r || typeof r.metric !== "string" || typeof r.condition !== "string" || !Number.isFinite(r.value)){
+      e.push("records[" + i + "] needs metric, condition and a finite value"); if(e.length > 5) break;
+    }
+  }
+  return e;
+}
+function addDoc(doc, name){
+  const problems = check(doc);
+  if(problems.length){ state.errors.push(name + ": " + problems.join("; ")); return; }
+  state.runs.push({name, doc});
+}
+function records(){ return state.runs.flatMap(r => r.doc.records.map(x => Object.assign({run_id:r.doc.run_id}, x))); }
+function sampleDoc(){
+  const recs = SAMPLE_GRID.map(([metric,condition,n,value,lo,hi]) => ({metric,condition,n,value,interval_low:lo,interval_high:hi}));
+  SAMPLE_MATRIX.forEach((row,i) => row.forEach((v,j) => recs.push({metric:"state_direction_matrix_cos",condition:"reference",relation:SAMPLE_REL[i],value:v,extra:{visual_relation:SAMPLE_REL[j]}})));
+  return {schema_version:"0.1", run_id:"sample-report-means", records:recs, sample:true};
+}
+function color(cond){
+  if(cond === "baseline") return "var(--base)";
+  if(!(cond in SLOTS)) SLOTS[cond] = 6 + Object.keys(SLOTS).filter(k => SLOTS[k] > 5).length;
+  return "var(--s" + (((SLOTS[cond] - 1) % 8) + 1) + ")";
+}
+function el(tag, attrs, parent){ const n = document.createElementNS(NS, tag); for(const k in attrs) n.setAttribute(k, attrs[k]); if(parent) parent.appendChild(n); return n; }
+function txt(parent, x, y, s, extra){ const t = el("text", Object.assign({x, y}, extra || {}), parent); t.textContent = s; return t; }
+function html(tag, props, parent){ const n = document.createElement(tag); Object.assign(n, props || {}); if(parent) parent.appendChild(n); return n; }
+function mean(a){ return a.reduce((s,v) => s + v, 0) / a.length; }
+function niceTicks(lo, hi, count){
+  const span = (hi - lo) || 1, raw = span / count, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1,2,5,10].map(m => m * mag).find(s => s >= raw);
+  const start = Math.floor(lo / step + 1e-9) * step, out = [];
+  let v = start;
+  do { out.push(Math.round(v / step) * step); v += step; } while(out[out.length - 1] < hi - 1e-9);
+  return out;
+}
+function cssRgb(name){
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const h = v.replace("#", ""); return [0,2,4].map(i => parseInt(h.slice(i, i + 2), 16));
+}
+function diverge(v){ // v in [-1, 1]: negative = worse than baseline, positive = better
+  const mid = cssRgb("--div-neutral"), end = cssRgb(v >= 0 ? "--div-pos" : "--div-neg"), t = Math.min(1, Math.abs(v));
+  const c = mid.map((x, i) => Math.round(x + (end[i] - x) * t));
+  const lum = (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255;
+  return {bg:"rgb(" + c.join(",") + ")", fg:lum > .55 ? "#14181f" : "#ffffff"};
+}
+
+// ---------- shared aggregation ----------
+function aggregate(recs, metric){
+  const groups = new Map();
+  for(const r of recs.filter(r => r.metric === metric)){
+    const key = r.condition + "|" + (r.n ?? 0);
+    if(!groups.has(key)) groups.set(key, {condition:r.condition, n:r.n ?? 0, v:[], lo:[], hi:[]});
+    const g = groups.get(key); g.v.push(r.value);
+    if(Number.isFinite(r.interval_low)) g.lo.push(r.interval_low);
+    if(Number.isFinite(r.interval_high)) g.hi.push(r.interval_high);
+  }
+  return [...groups.values()].map(g => {
+    const aggregated = g.v.length === 1 && g.lo.length === 1;
+    return {condition:g.condition, n:g.n, count:g.v.length, mean:mean(g.v),
+      lo:aggregated ? g.lo[0] : Math.min(...g.v), hi:aggregated ? g.hi[0] : Math.max(...g.v)};
+  });
+}
+
+// ---------- overview: change from baseline ----------
+function renderOverview(root){
+  const recs = records().filter(r => !r.metric.startsWith("state_direction"));
+  const metrics = [...new Set(recs.map(r => r.metric))];
+  const conds = [...new Set(recs.map(r => r.condition))];
+  if(!metrics.length){ html("p", {className:"empty", textContent:"No metric-grid records loaded. Expected metrics such as cka_excess with a condition and n."}, root); return; }
+  if(!conds.includes("baseline")){ html("p", {className:"empty", textContent:"The overview compares each condition with a condition named \"baseline\", which is missing from these records."}, root); return; }
+  const agg = {}; metrics.forEach(m => agg[m] = aggregate(recs, m));
+  const cols = [];
+  metrics.forEach(m => [...new Set(agg[m].map(d => d.n))].sort((a, b) => a - b).forEach(n => cols.push({m, n})));
+  const get = (m, c, n) => agg[m].find(d => d.condition === c && d.n === n);
+  const rows = conds.filter(c => c !== "baseline").map(c => {
+    const cells = cols.map(col => {
+      const a = get(col.m, c, col.n), b = get(col.m, "baseline", col.n);
+      if(!a || !b || Math.abs(b.mean) < 0.01) return null;
+      return {change:(a.mean - b.mean) / Math.abs(b.mean), a:a.mean, b:b.mean};
+    });
+    const vals = cells.filter(Boolean).map(x => x.change);
+    return {c, cells, avg:vals.length ? mean(vals) : 0, better:vals.filter(v => v > 0).length, total:vals.length};
+  }).sort((x, y) => y.avg - x.avg);
+  const card = html("div", {className:"card"}, root);
+  html("h2", {textContent:"Change from baseline"}, card);
+  html("p", {className:"note", textContent:"Each cell compares a condition with the baseline at the same sample size. Higher is better for every metric shown. Click a cell to see that metric across sample sizes."}, card);
+  const wrap = html("div", {className:"scroll"}, card), table = html("table", {className:"rob"}, wrap);
+  const head = html("thead", {}, table), r1 = html("tr", {}, head), r2 = html("tr", {}, head);
+  html("th", {}, r1); html("th", {}, r2);
+  metrics.forEach(m => { const span = cols.filter(c => c.m === m).length; const th = html("th", {textContent:SHORT[m] || m, colSpan:span}, r1); });
+  cols.forEach(c => html("th", {textContent:c.n ? "N = " + c.n : "all"}, r2));
+  const body = html("tbody", {}, table);
+  rows.forEach(row => {
+    const tr = html("tr", {}, body), th = html("th", {className:"rowh", scope:"row"}, tr);
+    const nm = html("span", {className:"nm"}, th); html("span", {className:"sw"}, nm).style.background = color(row.c); nm.append(row.c);
+    html("span", {className:"sub", textContent:"better in " + row.better + " of " + row.total + " cells"}, th);
+    row.cells.forEach((cell, i) => {
+      const td = html("td", {}, tr), b = html("button", {type:"button", className:"cell"}, td);
+      if(!cell){ b.disabled = true; b.textContent = "n/a"; return; }
+      const c = diverge(cell.change / 0.6);
+      b.style.background = c.bg; b.style.color = c.fg; b.textContent = pct(cell.change);
+      b.title = row.c + " vs baseline, " + (SHORT[cols[i].m] || cols[i].m) + (cols[i].n ? ", N = " + cols[i].n : "") + ": " + fmt(cell.a) + " vs " + fmt(cell.b) + " (" + pct(cell.change) + ")";
+      b.setAttribute("aria-label", b.title);
+      b.onclick = () => { state.metric = cols[i].m; state.view = "grid"; render(); };
+    });
+  });
+  const key = html("div", {className:"key"}, card);
+  key.append("Worse than baseline");
+  const ramp = html("span", {className:"ramp"}, key);
+  const stops = [-1, -.5, 0, .5, 1].map(v => diverge(v).bg);
+  ramp.style.background = "linear-gradient(90deg," + stops.join(",") + ")";
+  key.append("Better. Colour saturates at ±60%.");
+  const ul = html("ul", {className:"reading"}, card);
+  rows.forEach(row => { const li = html("li", {}, ul); html("span", {className:"sw"}, li).style.background = color(row.c);
+    li.append(row.c + ": better than baseline in " + row.better + " of " + row.total + " cells, average change " + pct(row.avg) + "."); });
+  html("p", {className:"note", textContent:"Relative change = (condition − baseline) / |baseline|. Cells come from means over comparisons that share preprocessing and nulls; ranges are not confidence intervals."}, card);
+}
+
+// ---------- metric grid ----------
+function renderGrid(root){
+  const recs = records().filter(r => !r.metric.startsWith("state_direction"));
+  const metrics = [...new Set(recs.map(r => r.metric))];
+  if(!metrics.length){ html("p", {className:"empty", textContent:"No metric-grid records loaded. Expected metrics such as cka_excess or knn_excess_fixed_k with a condition and (optionally) n."}, root); return; }
+  if(!metrics.includes(state.metric)) state.metric = metrics[0];
+  const card = html("div", {className:"card"}, root);
+  const bar = html("div", {className:"bar"}, card);
+  const sel = html("select", {ariaLabel:"Metric"}, bar);
+  metrics.forEach(m => html("option", {value:m, textContent:LABELS[m] || m, selected:m === state.metric}, sel));
+  sel.onchange = () => { state.metric = sel.value; render(); };
+  const band = html("label", {}, bar);
+  const box = html("input", {type:"checkbox", checked:state.band}, band);
+  band.append(" show range across comparisons");
+  box.onchange = () => { state.band = box.checked; render(); };
+  const data = aggregate(recs, state.metric);
+  const conds = [...new Set(recs.map(r => r.condition))];
+  const ns = [...new Set(data.map(d => d.n))].sort((a,b) => a - b);
+  const shown = data.filter(d => !state.hidden.has(d.condition));
+  const W = 760, H = 330, m = {l:56, r:40, t:12, b:40};
+  const ys = shown.flatMap(d => state.band ? [d.lo, d.hi] : [d.mean]);
+  const lo = Math.min(0, ...(ys.length ? ys : [0])), hi = Math.max(...(ys.length ? ys : [1]));
+  const ticks = niceTicks(lo, hi, 5), y0 = ticks[0], y1 = ticks[ticks.length - 1];
+  const sx = i => m.l + (ns.length === 1 ? (W - m.l - m.r) / 2 : i * (W - m.l - m.r) / (ns.length - 1));
+  const sy = v => m.t + (1 - (v - y0) / ((y1 - y0) || 1)) * (H - m.t - m.b);
+  const svg = el("svg", {viewBox:"0 0 " + W + " " + H, role:"img", "aria-label":(LABELS[state.metric] || state.metric) + " by sample size and condition"}, card);
+  ticks.forEach(t => { el("line", {x1:m.l, x2:W - m.r, y1:sy(t), y2:sy(t), stroke:"var(--grid)"}, svg); txt(svg, m.l - 8, sy(t) + 4, t.toFixed(2), {"text-anchor":"end"}); });
+  ns.forEach((n, i) => txt(svg, sx(i), H - 14, n === 0 ? "all" : "N = " + n, {"text-anchor":"middle"}));
+  conds.filter(c => !state.hidden.has(c)).forEach(c => {
+    const pts = ns.map((n, i) => ({i, d:data.find(d => d.condition === c && d.n === n)})).filter(p => p.d);
+    const col = color(c);
+    if(state.band) pts.forEach(p => { el("line", {x1:sx(p.i), x2:sx(p.i), y1:sy(p.d.lo), y2:sy(p.d.hi), stroke:col, "stroke-width":3, opacity:.22, "stroke-linecap":"round"}, svg); });
+    if(pts.length > 1) el("polyline", {points:pts.map(p => sx(p.i) + "," + sy(p.d.mean)).join(" "), fill:"none", stroke:col, "stroke-width":c === "baseline" ? 2.5 : 2, "stroke-dasharray":c === "baseline" ? "5 4" : ""}, svg);
+    pts.forEach(p => { const dot = el("circle", {cx:sx(p.i), cy:sy(p.d.mean), r:4.5, fill:col, stroke:"var(--panel)", "stroke-width":2}, svg);
+      el("title", {}, dot).textContent = c + (p.d.n ? ", N = " + p.d.n : "") + ": mean " + fmt(p.d.mean) + " [" + fmt(p.d.lo) + ", " + fmt(p.d.hi) + "], " + (p.d.count > 1 ? p.d.count + " comparisons" : "aggregate"); });
+  });
+  const legend = html("div", {className:"legend"}, card);
+  conds.forEach(c => { const b = html("button", {type:"button"}, legend); b.setAttribute("aria-pressed", String(!state.hidden.has(c)));
+    html("span", {className:"sw"}, b).style.background = color(c); b.append(c);
+    b.onclick = () => { state.hidden.has(c) ? state.hidden.delete(c) : state.hidden.add(c); render(); }; });
+  html("p", {className:"note", textContent:"Points are means over comparisons; bars show the range. Ranges are across dependent comparisons, not confidence intervals. Click a condition to hide it."}, card);
+  const t = html("div", {className:"scroll"}, card), table = html("table", {}, t);
+  const head = html("tr", {}, html("thead", {}, table)); html("th", {textContent:"Condition"}, head);
+  ns.forEach(n => html("th", {textContent:n === 0 ? "all" : "N = " + n}, head));
+  const body = html("tbody", {}, table);
+  conds.forEach(c => { const tr = html("tr", {}, body); html("td", {textContent:c}, tr);
+    ns.forEach(n => { const d = data.find(x => x.condition === c && x.n === n); html("td", {textContent:d ? fmt(d.mean) + " [" + fmt(d.lo) + ", " + fmt(d.hi) + "]" : "-"}, tr); }); });
+}
+
+// ---------- alignment ----------
+function heat(v, lo, hi){
+  const t = Math.max(0, Math.min(1, (v - lo) / ((hi - lo) || 1)));
+  const a = cssRgb("--div-neutral"), b = cssRgb("--div-pos"), c = a.map((x, i) => Math.round(x + (b[i] - x) * t));
+  const lum = (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255;
+  return {fill:"rgb(" + c.join(",") + ")", dark:lum <= .55};
+}
+function drawFlow(card, cells, rels, cols){
+  const W = 760, rowH = 54, H = 36 + rels.length * rowH, xl = 150, xr = W - 150, y = i => 28 + i * rowH + rowH / 2;
+  const svg = el("svg", {viewBox:"0 0 " + W + " " + H, role:"img", class:"flow", "aria-label":"Which visual change each text direction points to"}, card);
+  txt(svg, xl, 14, "text direction", {"text-anchor":"end"}); txt(svg, xr, 14, "held-out visual change", {"text-anchor":"start"});
+  const vmax = Math.max(0.01, ...cells.map(c => c.value));
+  const paths = [];
+  const draw = (i, j, v, diag) => {
+    if(v <= 0) return;
+    const p = el("path", {d:"M" + xl + "," + y(i) + " C" + (xl + 190) + "," + y(i) + " " + (xr - 190) + "," + y(j) + " " + xr + "," + y(j),
+      fill:"none", stroke:diag ? "var(--accent)" : "var(--base)", "stroke-width":1 + 15 * v / vmax, "stroke-linecap":"round", opacity:diag ? .9 : .38}, svg);
+    el("title", {}, p).textContent = rels[i] + " text direction vs " + cols[j] + " visual change: cosine " + v.toFixed(2);
+    paths.push({p, i, j, base:diag ? .9 : .38});
+  };
+  const val = (i, j) => (cells.find(c => c.relation === rels[i] && c.extra && c.extra.visual_relation === cols[j]) || {value:0}).value;
+  rels.forEach((r, i) => cols.forEach((c, j) => { if(r !== c) draw(i, j, val(i, j), false); }));
+  rels.forEach((r, i) => { const j = cols.indexOf(r); if(j >= 0) draw(i, j, val(i, j), true); });
+  const focus = (i, j) => paths.forEach(q => q.p.setAttribute("opacity", (i == null && j == null) || q.i === i || q.j === j ? q.base : .06));
+  rels.forEach((r, i) => { const g = el("g", {class:"node", tabindex:0}, svg);
+    el("circle", {cx:xl, cy:y(i), r:5, fill:"var(--ink)"}, g); txt(g, xl - 12, y(i) + 4, r, {"text-anchor":"end"}).style.fill = "var(--ink)";
+    g.addEventListener("mouseenter", () => focus(i, null)); g.addEventListener("mouseleave", () => focus(null, null));
+    g.addEventListener("focus", () => focus(i, null)); g.addEventListener("blur", () => focus(null, null)); });
+  cols.forEach((c, j) => { const g = el("g", {class:"node", tabindex:0}, svg);
+    el("circle", {cx:xr, cy:y(j), r:5, fill:"var(--ink)"}, g); txt(g, xr + 12, y(j) + 4, c, {"text-anchor":"start"}).style.fill = "var(--ink)";
+    g.addEventListener("mouseenter", () => focus(null, j)); g.addEventListener("mouseleave", () => focus(null, null));
+    g.addEventListener("focus", () => focus(null, j)); g.addEventListener("blur", () => focus(null, null)); });
+}
+function renderAlignment(root){
+  const recs = records();
+  const mat = recs.filter(r => r.metric === "state_direction_matrix_cos");
+  const cat = recs.filter(r => ["state_direction_top1","state_direction_margin","state_direction_cos_own"].includes(r.metric));
+  if(!mat.length && !cat.length){ html("p", {className:"empty", textContent:"No alignment records loaded. Expected state_direction_matrix_cos (relation, extra.visual_relation) or per-category state_direction_* records (relation, noun)."}, root); return; }
+  if(mat.length){
+    const conds = [...new Set(mat.map(r => r.condition))];
+    if(!conds.includes(state.cond)) state.cond = conds[0];
+    const card = html("div", {className:"card"}, root);
+    html("h2", {textContent:"Does each text direction point at its own visual change?"}, card);
+    html("p", {className:"note", textContent:"Each line joins a relation's text direction (left) to a held-out visual change (right). Line width is the cosine. The blue lines join a relation to itself; grey lines are the other relations. Hover a name to isolate its lines. Negative cosines are not drawn."}, card);
+    const sel = html("select", {ariaLabel:"Condition"}, card);
+    conds.forEach(c => html("option", {value:c, textContent:c, selected:c === state.cond}, sel));
+    sel.onchange = () => { state.cond = sel.value; render(); };
+    const cells = mat.filter(r => r.condition === state.cond);
+    const rels = [...new Set(cells.map(r => r.relation))], cols = [...new Set(cells.map(r => r.extra && r.extra.visual_relation))];
+    drawFlow(card, cells, rels, cols);
+    const det = html("details", {}, card); html("summary", {textContent:"Show matrix values"}, det);
+    const vals = cells.map(r => r.value), lo = Math.min(0, ...vals), hi = Math.max(...vals);
+    const sc = html("div", {className:"scroll"}, det), table = html("table", {}, sc);
+    const head = html("tr", {}, html("thead", {}, table)); html("th", {textContent:"text \\ visual"}, head); cols.forEach(c => html("th", {textContent:c}, head));
+    const body = html("tbody", {}, table);
+    rels.forEach(r => { const tr = html("tr", {}, body); html("td", {textContent:r}, tr);
+      cols.forEach(c => { const cell = cells.find(x => x.relation === r && x.extra && x.extra.visual_relation === c);
+        const td = html("td", {textContent:cell ? cell.value.toFixed(3) : "-"}, tr);
+        if(cell){ const h = heat(cell.value, lo, hi); td.style.background = h.fill; td.style.color = h.dark ? "#fff" : "#14181f"; if(r === c) td.style.fontWeight = "700"; } }); });
+  }
+  if(cat.length){
+    const metrics = [...new Set(cat.map(r => r.metric))];
+    if(!metrics.includes(state.catMetric)) state.catMetric = metrics.includes("state_direction_top1") ? "state_direction_top1" : metrics[0];
+    const conds = [...new Set(cat.map(r => r.condition))];
+    if(!conds.includes(state.cond)) state.cond = conds[0];
+    const card = html("div", {className:"card"}, root);
+    html("h2", {textContent:"Match across held-out categories, by relation"}, card);
+    const bar = html("div", {className:"bar"}, card);
+    const s1 = html("select", {ariaLabel:"Measure"}, bar);
+    metrics.forEach(m => html("option", {value:m, textContent:LABELS[m] || m, selected:m === state.catMetric}, s1));
+    s1.onchange = () => { state.catMetric = s1.value; render(); };
+    const s2 = html("select", {ariaLabel:"Condition"}, bar);
+    conds.forEach(c => html("option", {value:c, textContent:c, selected:c === state.cond}, s2));
+    s2.onchange = () => { state.cond = s2.value; render(); };
+    const rows = cat.filter(r => r.metric === state.catMetric && r.condition === state.cond);
+    const rels = [...new Set(rows.map(r => r.relation))];
+    const per = rels.map(r => { const v = rows.filter(x => x.relation === r).map(x => x.value); return {r, m:mean(v), n:v.length}; });
+    const top = state.catMetric === "state_direction_top1", W = 760, H = 260, m = {l:56, r:92, t:12, b:44};
+    const y1 = top ? 1 : Math.max(0.1, ...per.map(p => p.m)) * 1.15, y0 = Math.min(0, ...per.map(p => p.m));
+    const sy = v => m.t + (1 - (v - y0) / (y1 - y0)) * (H - m.t - m.b), bw = (W - m.l - m.r) / per.length;
+    const svg = el("svg", {viewBox:"0 0 " + W + " " + H, role:"img", "aria-label":"Per-relation values"}, card);
+    niceTicks(y0, y1, 4).filter(t => t >= y0 - 1e-9 && t <= y1 + 1e-9).forEach(t => { el("line", {x1:m.l, x2:W - m.r, y1:sy(t), y2:sy(t), stroke:"var(--grid)"}, svg); txt(svg, m.l - 8, sy(t) + 4, t.toFixed(2), {"text-anchor":"end"}); });
+    per.forEach((p, i) => { const x = m.l + i * bw + bw * .2, h = Math.abs(sy(p.m) - sy(0));
+      const rect = el("rect", {x, y:Math.min(sy(p.m), sy(0)), width:bw * .6, height:Math.max(h, 1), rx:4, fill:"var(--accent)"}, svg);
+      el("title", {}, rect).textContent = p.r + ": mean " + fmt(p.m) + " over " + p.n + " categories";
+      txt(svg, x + bw * .3, H - 24, p.r, {"text-anchor":"middle"}); txt(svg, x + bw * .3, H - 8, "n = " + p.n, {"text-anchor":"middle"}); });
+    if(top){ el("line", {x1:m.l, x2:W - m.r, y1:sy(.2), y2:sy(.2), stroke:"var(--s8)", "stroke-dasharray":"5 4", "stroke-width":1.5}, svg); txt(svg, W - m.r + 6, sy(.2) + 4, "chance 0.20", {"text-anchor":"start"}); }
+    html("p", {className:"note", textContent:"Bars are means over held-out categories for each relation. Five relations only; descriptive."}, card);
+  }
+}
+
+// ---------- placeholders ----------
+function renderPlaceholder(root, title, text){
+  const card = html("div", {className:"card"}, root);
+  html("h2", {textContent:title}, card); html("p", {className:"note", textContent:text}, card);
+}
+function render(){
+  const tabs = $("tabs"); tabs.textContent = "";
+  [["overview","Overview"],["grid","Metric grid"],["align","Alignment"],["trade","Strength vs retention"],["gallery","Examples"]].forEach(([id, label]) => {
+    const b = html("button", {type:"button", textContent:label, role:"tab"}, tabs); b.setAttribute("aria-selected", String(state.view === id));
+    b.onclick = () => { state.view = id; render(); }; });
+  $("files").textContent = ""; state.runs.forEach(r => html("li", {textContent:r.doc.sample ? "sample data" : r.name + " (" + r.doc.records.length + " records)"}, $("files")));
+  $("errors").textContent = ""; state.errors.forEach(e => html("div", {className:"err", textContent:e}, $("errors")));
+  const root = $("view"); root.textContent = "";
+  if(!state.runs.length){ html("p", {className:"empty", textContent:"Load a results file or the sample to begin."}, root); return; }
+  if(state.runs.some(r => r.doc.sample)) html("p", {className:"note", textContent:SAMPLE_NOTE}, root);
+  if(state.view === "overview") renderOverview(root);
+  else if(state.view === "grid") renderGrid(root);
+  else if(state.view === "align") renderAlignment(root);
+  else if(state.view === "trade") renderPlaceholder(root, "Strength versus retention", "Waiting for Track 2 results. Expected records: metrics such as joint, retention and ap for each step-size strength (extra.strength), one set per method as the condition.");
+  else renderPlaceholder(root, "Examples and errors", "Waiting for Track 2 results. Expected: per-query records with relation, noun and the top retrieved item (extra) so successes and failures can be browsed.");
+}
+async function loadFiles(files){
+  state.runs = state.runs.filter(r => !r.doc.sample); state.errors = [];
+  for(const f of files){ try{ addDoc(JSON.parse(await f.text()), f.name); }catch(err){ state.errors.push(f.name + ": " + err.message); } }
+  render();
+}
+function setTheme(t){
+  state.theme = t;
+  if(t === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", t);
+  $("theme").textContent = "Theme: " + t;
+  try{ localStorage.setItem("prh-theme", t); }catch(e){}
+  render();
+}
+$("theme").onclick = () => setTheme({auto:"light", light:"dark", dark:"auto"}[state.theme]);
+$("picker").onchange = e => loadFiles(e.target.files);
+$("drop").onclick = () => $("picker").click();
+$("drop").onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); $("picker").click(); } };
+["dragover","dragenter"].forEach(t => $("drop").addEventListener(t, e => { e.preventDefault(); $("drop").classList.add("over"); }));
+["dragleave","drop"].forEach(t => $("drop").addEventListener(t, e => { e.preventDefault(); $("drop").classList.remove("over"); }));
+$("drop").addEventListener("drop", e => loadFiles(e.dataTransfer.files));
+$("sample").onclick = () => { state.runs = []; state.errors = []; addDoc(sampleDoc(), "sample"); render(); };
+$("clear").onclick = () => { state.runs = []; state.errors = []; state.hidden.clear(); render(); };
+let saved = "auto"; try{ saved = localStorage.getItem("prh-theme") || "auto"; }catch(e){}
+const param = new URLSearchParams(location.search).get("data");
+if(param){ fetch(param).then(r => r.json()).then(d => { addDoc(d, param); render(); }).catch(e => { state.errors.push(param + ": " + e.message); render(); }); }
+else { addDoc(sampleDoc(), "sample"); }
+setTheme(["auto","light","dark"].includes(saved) ? saved : "auto");
+</script>
+</body>
+</html>
