@@ -22,3 +22,18 @@ def test_planted_shift_is_recovered_and_beats_shuffled_bridge():
         assert s['text_top1'] > 0.8
         assert s['text_margin'] > s['null_margin_q95']
         assert s['image_margin'] > 0
+
+
+def test_category_records_bootstrap_and_posthoc():
+    from state_directions import bootstrap_categories
+    data = synthetic()
+    folds = analyze(data, ['reference'], shuffles=5, splits=3)['reference']
+    records = [r for f in folds for r in f['records']]
+    assert len(records) == sum(len(v) for v in data['nouns_for'].values())
+    s = summarize(folds, draws=200)
+    cat = s['category']
+    assert cat['top1']['low'] <= cat['top1']['mean'] <= cat['top1']['high']
+    assert cat['top1']['low'] > 0.2
+    assert -2 <= s['posthoc_margin'] <= 2 and 0 <= s['posthoc_top1'] <= 1
+    again = bootstrap_categories(records, 200)
+    assert again == bootstrap_categories(records, 200)

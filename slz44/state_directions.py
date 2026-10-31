@@ -5,6 +5,7 @@ See STATE_DIRECTIONS_PROTOCOL.md.
     python state_directions.py [--run data/states] [--shuffles 200]
 """
 import argparse
+import csv
 import hashlib
 import json
 from pathlib import Path
@@ -80,6 +81,14 @@ def run_fold(data, fold, cond, group, index, shuffles, splits, seed):
                       for c in names])
     d_test = np.stack([np.mean([state_diff(image, img_index, specs[c], n) for n in test[c]], axis=0) for c in names])
     m_text, m_img = cosine_matrix(d_text, d_test), cosine_matrix(d_img, d_test)
+    m_post = cosine_matrix(d_text - d_text.mean(0), d_test - d_test.mean(0))
+    records = []
+    for k, c in enumerate(names):
+        for n in test[c]:
+            cos = cosine_matrix(d_text, state_diff(image, img_index, specs[c], n)[None])[:, 0]
+            other = float(np.delete(cos, k).mean())
+            records.append(dict(fold=fold, relation=c, noun=n, cos_own=float(cos[k]), cos_other_mean=other,
+                                margin=float(cos[k] - other), top1=float(cos.argmax() == k)))
     rng = np.random.default_rng([seed, fold, CONDITIONS.index(cond)])
     null = []
     for _ in range(shuffles):
@@ -98,7 +107,8 @@ def run_fold(data, fold, cond, group, index, shuffles, splits, seed):
             b_i.append(np.mean([state_diff(image, img_index, specs[c], n, PER_STATE // 2) for n in parts[1]], axis=0))
         stab_t.append(float(np.mean(np.sum(unit(np.stack(a_t)) * unit(np.stack(b_t)), axis=1))))
         stab_i.append(float(np.mean(np.sum(unit(np.stack(a_i)) * unit(np.stack(b_i)), axis=1))))
-    return dict(fold=fold, text=match_stats(m_text), image=match_stats(m_img), matrix_text=m_text.tolist(),
+    return dict(fold=fold, text=match_stats(m_text), image=match_stats(m_img), posthoc=match_stats(m_post),
+                matrix_posthoc=m_post.tolist(), records=records, matrix_text=m_text.tolist(),
                 matrix_image=m_img.tolist(), null_margin=[v['margin'] for v in null],
                 null_top1=[v['top1'] for v in null], stability_text=float(np.mean(stab_t)),
                 stability_image=float(np.mean(stab_i)))
@@ -111,7 +121,31 @@ def analyze(data, conditions=CONDITIONS, shuffles=200, splits=20, seed=SEED):
             for c in conditions}
 
 
-def summarize(folds):
+def bootstrap_categories(records, draws=2000, seed=SEED):
+    """Resample category labels (as units across relations); mean within relation, then across relations."""
+    nouns = sorted({r['noun'] for r in records})
+    position = {n: i for i, n in enumerate(nouns)}
+    idx = np.array([position[r['noun']] for r in records])
+    rel = np.array([r['relation'] for r in records])
+    rng = np.random.default_rng([seed, 7])
+    counts = rng.multinomial(len(nouns), np.full(len(nouns), 1 / len(nouns)), size=draws)
+    weights = counts[:, idx].astype(float)
+    out = {}
+    for key in ('margin', 'top1'):
+        vals = np.array([r[key] for r in records])
+        per = []
+        for c in sorted(set(rel)):
+            mask = rel == c
+            total = weights[:, mask].sum(1)
+            with np.errstate(invalid='ignore', divide='ignore'):
+                per.append((weights[:, mask] * vals[mask]).sum(1) / total)
+        draws_ = np.nanmean(np.stack(per), axis=0)
+        point = float(np.mean([vals[rel == c].mean() for c in sorted(set(rel))]))
+        out[key] = dict(mean=point, low=float(np.nanquantile(draws_, .025)), high=float(np.nanquantile(draws_, .975)))
+    return out
+
+
+def summarize(folds, draws=2000):
     t_margin = [f['text']['margin'] for f in folds]
     null = np.mean([f['null_margin'] for f in folds], axis=0)
     null_top1 = np.mean([f['null_top1'] for f in folds], axis=0)
@@ -124,6 +158,10 @@ def summarize(folds):
                 image_top1=float(np.mean([f['image']['top1'] for f in folds])),
                 stability_text=float(np.mean([f['stability_text'] for f in folds])),
                 stability_image=float(np.mean([f['stability_image'] for f in folds])),
+                posthoc_margin=float(np.mean([f['posthoc']['margin'] for f in folds])),
+                posthoc_top1=float(np.mean([f['posthoc']['top1'] for f in folds])),
+                matrix_posthoc=np.mean([f['matrix_posthoc'] for f in folds], axis=0).tolist(),
+                category=bootstrap_categories([r for f in folds for r in f['records']], draws),
                 matrix_text=np.mean([f['matrix_text'] for f in folds], axis=0).tolist())
 
 
@@ -136,12 +174,28 @@ def report(summary, names, out, shuffles):
         lines.append(f"| {cond} | {s['text_margin']:.3f} [{s['text_margin_range'][0]:.3f}, {s['text_margin_range'][1]:.3f}] "
                      f"| {s['text_top1']:.2f} | {s['null_margin_mean']:.3f} / {s['null_margin_q95']:.3f} | {s['margin_p']:.3f} "
                      f"| {s['image_margin']:.3f} | {s['image_top1']:.2f} | {s['stability_text']:.2f} / {s['stability_image']:.2f} |")
+    lines += ['', '## Per-category match with bootstrap intervals', '',
+              'Each held-out (relation, category) scored on its own visual direction (8 images per state), so noisier than the matrix above. Category-label bootstrap (2,000 draws), percentile 95% interval, descriptive, unadjusted for six conditions. Top-1 chance 0.20.', '',
+              '| Condition | Mean margin [95% interval] | Top-1 [95% interval] |', '|---|---|---|']
+    for cond, s_ in summary.items():
+        cat = s_['category']
+        lines.append(f"| {cond} | {cat['margin']['mean']:.3f} [{cat['margin']['low']:.3f}, {cat['margin']['high']:.3f}] "
+                     f"| {cat['top1']['mean']:.2f} [{cat['top1']['low']:.2f}, {cat['top1']['high']:.2f}] |")
+    lines += ['', '## Post-hoc: shared component removed', '',
+              'Suggested by the first run. The mean of the five text directions and of the five visual directions is subtracted before matching. Primary results above are unchanged.', '',
+              '| Condition | Margin | Top-1 |', '|---|---|---|']
+    for cond, s_ in summary.items():
+        lines.append(f"| {cond} | {s_['posthoc_margin']:.3f} | {s_['posthoc_top1']:.2f} |")
     ref = 'reference' if 'reference' in summary else next(iter(summary))
+    lines += ['', f'## Post-hoc alignment matrix, {ref}', '',
+              '| | ' + ' | '.join(names) + ' |', '|---|' + '---|' * len(names)]
+    for name, row in zip(names, summary[ref]['matrix_posthoc']):
+        lines.append(f'| {name} | ' + ' | '.join(f'{v:.3f}' for v in row) + ' |')
     lines += ['', f'## Alignment matrix, {ref} (rows: text direction; columns: held-out visual direction)', '',
               '| | ' + ' | '.join(names) + ' |', '|---|' + '---|' * len(names)]
     for name, row in zip(names, summary[ref]['matrix_text']):
         lines.append(f'| {name} | ' + ' | '.join(f'{v:.3f}' for v in row) + ' |')
-    lines += ['', 'Exploratory. Protocol: STATE_DIRECTIONS_PROTOCOL.md. Groups of images, not before-and-after pairs.']
+    lines += ['', 'Exploratory. Protocols: STATE_DIRECTIONS_PROTOCOL.md and STATE_DIRECTIONS_ADDENDUM.md. Groups of images, not before-and-after pairs.']
     out.mkdir(parents=True, exist_ok=True)
     (out / 'REPORT.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
@@ -166,17 +220,27 @@ def main(argv=None):
     parser.add_argument('--out', type=Path, default=Path('results/state_directions'))
     parser.add_argument('--shuffles', type=int, default=200)
     parser.add_argument('--splits', type=int, default=20)
+    parser.add_argument('--draws', type=int, default=2000)
     parser.add_argument('--conditions', nargs='+', default=CONDITIONS, choices=CONDITIONS)
     args = parser.parse_args(argv)
     data, manifest = load_run(args.run)
     names = [r['name'] for r in data['relations']]
     folds = analyze(data, args.conditions, args.shuffles, args.splits)
-    summary = {c: summarize(f) for c, f in folds.items()}
-    own = [Path(__file__), Path(__file__).with_name('STATE_DIRECTIONS_PROTOCOL.md')]
+    summary = {c: summarize(f, args.draws) for c, f in folds.items()}
+    own = [Path(__file__), Path(__file__).with_name('STATE_DIRECTIONS_PROTOCOL.md'),
+           Path(__file__).with_name('STATE_DIRECTIONS_ADDENDUM.md')]
     write_json(args.out / 'results.json', dict(
         source_hashes={p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in own},
         manifest_hash=manifest.get('hash'), shuffles=args.shuffles, splits=args.splits,
         summary=summary, folds=folds))
+    with (args.out / 'categories.csv').open('w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=['condition', 'fold', 'relation', 'noun', 'cos_own', 'cos_other_mean',
+                                               'margin', 'top1'])
+        writer.writeheader()
+        for cond, runs in folds.items():
+            for run in runs:
+                for r in run['records']:
+                    writer.writerow(dict(condition=cond, **r))
     report(summary, names, args.out, args.shuffles)
     plot(summary, names, args.out / 'alignment_matrix.png')
     print((args.out / 'REPORT.md').read_text(encoding='utf-8'))
