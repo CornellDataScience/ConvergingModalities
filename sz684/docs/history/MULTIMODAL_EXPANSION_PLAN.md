@@ -1,3 +1,5 @@
+> Historical planning document from October 18, 2026. Repository findings and proposed dates below describe that time, not the current implementation. The implemented study is indexed in [the multimodal README](../../experiments/multimodal_structure/README.md), with [week-8 results](../../experiments/multimodal_structure/docs/week8/RESULTS.md). Current follow-up planning is in [STATE_RELATIONS_PLAN.md](../planning/STATE_RELATIONS_PLAN.md).
+
 # Independently trained unimodal models: cross-modal research plan
 
 Planning date: October 18, 2026. Proposed start: October 19. This is a proposed study, not a preregistration or an implemented pipeline.

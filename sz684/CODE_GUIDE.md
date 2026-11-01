@@ -1,6 +1,8 @@
 # Reading the state-transfer code
 
-Use `run.py --list` for commands. The [repository README](README.md) and each experiment README map the folder roles. Start with `experiments/state_transfer/configs/state_transfer.json`, then `experiments/state_transfer/evaluation/state_analysis.py`. The latest experiment is natural-image retrieval across five state changes; the color and WIT scripts are earlier stages.
+For the complete repository map, including the separate multimodal study and historical files, start with the [newcomer guide and data-flow diagrams](docs/NEWCOMER_GUIDE.md) and [file inventory](docs/FILE_INVENTORY.md). The two follow-up tracks are [planning only](docs/planning/STATE_RELATIONS_PLAN.md).
+
+Use `run.py --list` for commands. The [repository README](README.md) and each experiment README map the folder roles. Start with `experiments/state_transfer/configs/state_transfer.json`, then `experiments/state_transfer/evaluation/state_analysis.py`. The reference state-transfer experiment is natural-image retrieval across five state changes; the color and WIT scripts are earlier stages.
 
 ## Pipeline and file map
 
@@ -74,7 +76,7 @@ The four planned AP contrasts compare the text direction with no shift, random, 
 
 ## Historical modules and provenance
 
-- `experiments/baseline/data/experiment.py`, `experiments/baseline/evaluation/alignment.py`, `experiments/heldout_layers/evaluation/heldout_layers.py`, `experiments/robustness/evaluation/robustness.py`, `experiments/paired_uncertainty/evaluation/paired_uncertainty.py`, `experiments/baseline/evaluation/language_eval.py`, `experiments/baseline/evaluation/verify_extraction.py`, and `experiments/baseline/reporting/report.py`: WIT alignment/replication and robustness work. `experiments/baseline/data/experiment.py` also supplies utilities used by the state pipeline.
+- `experiments/baseline/data/experiment.py`, `experiments/baseline/evaluation/alignment.py`, `experiments/heldout_layers/evaluation/heldout_layers.py`, `experiments/robustness/evaluation/robustness.py`, `experiments/paired_uncertainty/evaluation/paired_uncertainty.py`, `experiments/baseline/evaluation/language_eval.py`, `experiments/baseline/evaluation/verify_extraction.py`, and `experiments/baseline/reporting/report.py`: WIT alignment/replication and robustness work. Its feature loader is used by historical analysis modules; state data preparation separately reads the baseline manifest for model revisions.
 - `experiments/difference_transfer/evaluation/difference_transfer.py` and `experiments/endpoint_audit/evaluation/endpoint_audit.py`: arbitrary endpoint-difference transfer and its audit. Their results do not by themselves establish semantic relation transfer.
 - `experiments/color_transfer/data/quickdraw_data.py`, `experiments/color_transfer/data/semantic_extract.py`, and the executable part of `experiments/color_transfer/evaluation/semantic_analysis.py`: retired color experiment. `experiments/color_transfer/evaluation/pilot_planning.py` belongs to that earlier planning stage.
 - Earlier protocols and research reports retain their original claims and timing, with status notices linking to the active experiment.

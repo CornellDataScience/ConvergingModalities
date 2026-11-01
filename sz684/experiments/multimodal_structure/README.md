@@ -1,5 +1,7 @@
 # Cross-modal structure experiment
 
+**Status:** exploratory released-label study, separate from the planned state-transfer tracks. See the [repository map](../../docs/NEWCOMER_GUIDE.md) and the [historical expansion proposal](../../docs/history/MULTIMODAL_EXPANSION_PLAN.md).
+
 Latest stage: [week-8 report](docs/week8/RESULTS.md),
 [locked protocol](docs/WEEK8_PROTOCOL.md), and [reproduction guide](docs/WEEK8_RUN_GUIDE.md).
 See [validation notes](docs/week8/VALIDATION.md) for template stability and transport-calibration limits.

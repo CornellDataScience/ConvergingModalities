@@ -1,4 +1,6 @@
-# Latest completed experiment: natural object-state transfer
+# Completed reference study: natural object-state transfer
+
+**Status:** completed reference study; identity follow-ups are exploratory. The proposed two-track extension is [planning only](../../docs/planning/STATE_RELATIONS_PLAN.md).
 
 Cleaning, cooking (raw → cooked), ripening, thawing, and drying across noun labels excluded from fitting.
 
