@@ -1,0 +1,20 @@
+{
+  "scope": "Locked held-out released-label study; category CAVs are not state-change operators",
+  "seed": 20261023,
+  "concepts": 80,
+  "recordings_per_concept": 15,
+  "text_templates_per_concept": 4,
+  "exclude_first_pilot_concepts_and_recordings": true,
+  "models": ["bloomz-560m", "pythia410", "dinov2_base", "mae_base", "beats_iter1", "audiomae"],
+  "pooling": "Declared native CLS or masked-token mean; no test-selected layers",
+  "dimensions": [8, 16, 32],
+  "probe_alphas": [0.1, 1.0, 10.0],
+  "dimension_selection": "Mean validation transported balanced accuracy over both category axes, per map direction",
+  "axes": ["instrument_performance", "biological_vs_manufactured"],
+  "k": 3,
+  "permutations": 999,
+  "primary_comparisons": ["text-vision", "audio-vision"],
+  "secondary_comparisons": ["text-audio", "within-modality"],
+  "controls": ["shuffled training anchors", "reversed classifier normal", "target-model probe"],
+  "inference_deferred": ["multiplicity-adjusted decisions", "refit-inclusive intervals", "independent-source replication"]
+}

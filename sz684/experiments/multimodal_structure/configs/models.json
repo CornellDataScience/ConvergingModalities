@@ -1,0 +1,23 @@
+{
+  "bloom_base": {
+    "modality": "text", "checkpoint": "bigscience/bloom-560m",
+    "revision": "PIN_IMMUTABLE_REVISION_BEFORE_EXTRACTION", "offline": true,
+    "layer": -1, "pooling": "masked_mean", "max_tokens": 128,
+    "eligible_unimodal": false,
+    "provenance": "Candidate: audit and pin original text-only base checkpoint before enabling"
+  },
+  "dinov2_base": {
+    "modality": "vision", "architecture": "vit_base_patch14_dinov2.lvd142m",
+    "revision": "PIN_IMMUTABLE_REVISION_BEFORE_EXTRACTION",
+    "weights_path": "SET_LOCAL_WEIGHTS_PATH", "weights_sha256": "SET_SHA256",
+    "layer": -1, "pooling": "cls", "eligible_unimodal": false,
+    "provenance": "Candidate: original image-only DINOv2 backbone, no language-aligned head"
+  },
+  "beats_iter1": {
+    "modality": "audio", "revision": "PIN_SOURCE_COMMIT_AND_CHECKPOINT_ID",
+    "weights_path": "SET_LOCAL_ITER1_PRETRAINING_CHECKPOINT", "weights_sha256": "SET_SHA256",
+    "source_path": "SET_LOCAL_OFFICIAL_BEATS_SOURCE_DIRECTORY", "source_sha256": {},
+    "max_seconds": 10, "pooling": "token_mean", "eligible_unimodal": false,
+    "provenance": "Candidate: iter1 random-projection tokenizer, not a fine-tuned checkpoint"
+  }
+}

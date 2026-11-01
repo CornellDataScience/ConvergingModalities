@@ -1,0 +1,11 @@
+{
+  "description": "Exploratory pilot defaults; CLI arguments are explicit, this file is a reference",
+  "geometry_split": "test",
+  "k": 3,
+  "permutations": 199,
+  "seed": 42,
+  "alignment_dimensions": 8,
+  "probe_alphas": [0.1, 1, 10],
+  "retrieval_scales": [0, 0.25, 0.5, 1, 2, 4],
+  "primary_pairs": ["vision-text", "vision-audio"]
+}

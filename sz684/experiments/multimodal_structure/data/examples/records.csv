@@ -1,0 +1,4 @@
+sample_id,concept_id,family_id,source_id,modality,split,text,path,relation,label
+text_bell_1,bell_ringing,bell,label_bell_1,text,train,a bell ringing,,,
+image_bell_1,bell_ringing,bell,recording_bell_1,vision,train,,bell.jpg,,
+audio_bell_1,bell_ringing,bell,recording_bell_1,audio,train,,bell.wav,,

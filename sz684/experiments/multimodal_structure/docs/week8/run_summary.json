@@ -1,0 +1,77 @@
+{
+  "date": "2026-10-23",
+  "stage": "week8_locked_test_complete_under_released_label_scope",
+  "dataset_hash": "7f7d6c32fd0ffd6766cf5b12ac27115e849aeea56fc37be9651dab057cde38ba",
+  "lock_sha256": "83f2b63601eb876b76f78e90ae63d058c61440568a577bdcc318513ee0833c89",
+  "concepts": 80,
+  "recordings": 1200,
+  "text_descriptions": 320,
+  "test_concepts": 16,
+  "models": {
+    "bloomz-560m": {
+      "checkpoint": "bigscience/bloomz-560m",
+      "origin_repository": null,
+      "revision": "a2845d7e13dd12efae154a9f1c63fcc2e0cc4b05",
+      "weights_sha256": null,
+      "provenance": "BLOOMZ text-only base and text instruction tuning; historical pinned revision; no image/audio supervision"
+    },
+    "pythia410": {
+      "origin_repository": "EleutherAI/pythia-410m",
+      "revision": "9879c9b5f8bea9051dcb0e68dff21493d67e9d4f",
+      "weights_sha256": "3e09001631bb18ec8a6f4522f8e6ab26a53099e69228f9822adc91bfbe27511b",
+      "provenance": "Original text-only Pythia base"
+    },
+    "dinov2_base": {
+      "checkpoint": "timm/vit_base_patch14_dinov2.lvd142m",
+      "origin_repository": null,
+      "revision": "4685c99dabffe5affac90bd99dbffd25801ae58d",
+      "weights_sha256": "55cbb5d887b336d430e649c277b85a1429e724871f9d02ac16203235886d8c7b",
+      "provenance": "Original DINOv2 image-only self-distillation backbone; historical pinned revision, no dino.txt head"
+    },
+    "mae_base": {
+      "origin_repository": "facebook/vit-mae-base",
+      "revision": "25b184bea5538bf5c4c852c79d221195fdd2778d",
+      "weights_sha256": "479dcef4bd5df06259399027b789f21e9d9a1b79f37155a64176d55bc26fdae8",
+      "provenance": "Original image-only MAE pretraining backbone, no label fine-tuning"
+    },
+    "beats_iter1": {
+      "checkpoint": null,
+      "origin_repository": null,
+      "revision": "5b53b0404df452a3a607d7e67687227730e5bad1",
+      "weights_sha256": "b5f4cc10bcbff63a437c695f33389e6411513b3f7d5cdae8fb62b5005f4a1fcd",
+      "provenance": "BEATs iter1 audio-only pretraining with random-projection tokenizer; original-format checkpoint from lpepino/beats_ckpts mirror. Fine-tuned checkpoints excluded; exact official-byte equivalence not independently established."
+    },
+    "audiomae": {
+      "origin_repository": "gaunernst/vit_base_patch16_1024_128.audiomae_as2m",
+      "revision": "86ef4d1348c011e4814bbf51f4acfb3094296532",
+      "weights_sha256": "364ff0d03cd8b6604b101c7e1ea7d79d8a35ba8ced6d7e5da4bb2c4bd6328563",
+      "provenance": "AudioMAE AudioSet2M self-supervised pretraining, converted to timm by gaunernst; no classifier head, no fine-tuning. Port provenance recorded; exact original-byte equivalence not asserted."
+    }
+  },
+  "geometry_pairs": 15,
+  "ordered_category_tests": 60,
+  "per_example_predictions": 10540,
+  "selected_dimensions": {
+    "32": 16,
+    "8": 10,
+    "16": 4
+  },
+  "source_snapshot_matches_lock": true,
+  "packages": {
+    "torch": "2.5.1",
+    "torchvision": "0.20.1",
+    "transformers": "4.46.3",
+    "timm": "1.0.12",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "torchaudio": "2.5.1",
+    "soundfile": "0.14.0",
+    "imageio-ffmpeg": "0.6.0"
+  },
+  "remaining": [
+    "refit-inclusive uncertainty",
+    "family-block inference and multiplicity",
+    "independent-source replication",
+    "independently verified audiovisual state-change labels"
+  ]
+}

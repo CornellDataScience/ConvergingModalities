@@ -1,0 +1,6 @@
+# Install the existing sz684 requirements first. Analysis also requires scipy.
+scipy>=1.11,<2
+# Optional real-audio extraction dependencies; torchaudio must match torch.
+soundfile>=0.12,<1
+torchaudio==2.5.1
+imageio-ffmpeg==0.6.0

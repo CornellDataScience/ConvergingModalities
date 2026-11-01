@@ -1,0 +1,81 @@
+concept,family,split,instrument_performance,biological_vs_manufactured
+baby crying,human_vocal_and_body,test,0,1
+baby laughter,human_vocal_and_body,test,0,1
+beat boxing,human_vocal_and_body,test,0,1
+"bee, wasp, etc. buzzing",small_animals,train,0,1
+"bird chirping, tweeting",birds,validation,0,1
+bird wings flapping,birds,validation,0,1
+blowtorch igniting,other_blowtorch,validation,0,0
+car engine idling,road_vehicles,train,0,0
+cat growling,felines,validation,0,1
+cat meowing,felines,validation,0,1
+cattle mooing,other_cattle,train,0,1
+"child speech, kid speaking",human_vocal_and_body,test,0,1
+chipmunk chirping,other_chipmunk,test,0,1
+chopping wood,tools,train,0,0
+church bell ringing,alarms,train,0,0
+coyote howling,canines,test,0,1
+disc scratching,instrument_electronic,test,1,0
+dog growling,canines,test,0,1
+"donkey, ass braying",other_donkey,train,0,1
+driving snowmobile,road_vehicles,train,0,0
+eletric blender running,appliances,train,0,0
+elk bugling,other_elk,validation,0,1
+"engine accelerating, revving, vroom",road_vehicles,train,0,0
+"female speech, woman speaking",human_vocal_and_body,test,0,1
+ferret dooking,other_ferret,train,0,1
+fire crackling,combustion,train,0,
+fireworks banging,combustion,train,0,
+footsteps on snow,other_footsteps,test,0,
+forging swords,tools,train,0,0
+gibbon howling,other_gibbon,train,0,1
+golf driving,other_golf,train,0,
+hair dryer drying,appliances,train,0,0
+hedge trimmer running,tools,train,0,0
+helicopter,aircraft,validation,0,0
+horse clip-clop,other_horse,train,0,1
+lathe spinning,tools,train,0,0
+lip smacking,other_lip,train,0,1
+machine gun shooting,combustion,train,0,
+mouse pattering,other_mouse,train,0,1
+opening or closing car doors,road_vehicles,train,0,0
+parrot talking,birds,validation,0,1
+people crowd,human_vocal_and_body,test,0,1
+people eating,human_vocal_and_body,test,0,1
+planing timber,tools,train,0,0
+playing accordion,instrument_keyboards,train,1,0
+playing bagpipes,instrument_woodwind,validation,1,0
+playing bassoon,instrument_woodwind,validation,1,0
+playing bongo,instrument_percussion,train,1,0
+playing didgeridoo,instrument_woodwind,validation,1,0
+playing electric guitar,instrument_strings,test,1,0
+playing guiro,instrument_percussion,train,1,0
+playing harp,instrument_strings,test,1,0
+playing hockey,sports,train,0,
+playing oboe,instrument_woodwind,validation,1,0
+playing piano,instrument_keyboards,train,1,0
+playing snare drum,instrument_percussion,train,1,0
+playing squash,sports,train,0,
+playing synthesizer,instrument_keyboards,train,1,0
+playing tambourine,instrument_percussion,train,1,0
+playing tennis,sports,train,0,
+playing trombone,instrument_brass,train,1,0
+playing trumpet,instrument_brass,train,1,0
+playing tuning fork,instrument_percussion,train,1,0
+"playing violin, fiddle",instrument_strings,test,1,0
+police car (siren),road_vehicles,train,0,0
+printer printing,appliances,train,0,0
+"railroad car, train wagon",rail,train,0,0
+raining,water,train,0,
+sea waves,water,train,0,
+sheep bleating,other_sheep,test,0,1
+singing bowl,instrument_percussion,train,1,0
+snake hissing,small_animals,train,0,1
+tap dancing,other_tap,validation,0,
+typing on computer keyboard,appliances,train,0,0
+underwater bubbling,water,train,0,
+using sewing machines,appliances,train,0,0
+vacuum cleaner cleaning floors,appliances,train,0,0
+wind chime,instrument_percussion,train,1,0
+wind rustling leaves,weather,train,0,
+woodpecker pecking tree,birds,validation,0,1

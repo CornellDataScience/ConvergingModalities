@@ -1,13 +1,21 @@
 # Current research direction
 
-October 15, 2026: user rejected red→blue as the main research task and asked for substantially more useful relations. The Quick, Draw! color experiment is **retired as a sanity check**. Its main GPU extraction was interrupted on request before test scoring. Preserve partial caches and pilot results for provenance; do not resume it or present it as the paper's main result without a new instruction.
+The latest completed experiment is **natural-image object-state transfer**: cleaning (dirty → clean), cooking (raw → cooked), ripening (unripe → ripe), thawing (frozen → thawed), and drying (wet → dry). See [README.md](README.md) for commands and [CODE_GUIDE.md](CODE_GUIDE.md) for implementation details.
 
-The active direction is transferable physical object-state relations in natural images, with multiple meaningful state changes and object/source-held-out evaluation. Candidate relations include opening/closing, filling/emptying, cutting/peeling, cleaning, cooking and melting, depending on verified dataset coverage. No availability or result is assumed before inspecting annotations. Compare universal relation offsets against source-only retrieval, direct target text, random/reversed/wrong relations, image-derived directions and supervised endpoint maps. Separate useful target-state retrieval from mere object recognition.
+## Completed study
 
-The requested stronger paper remains the objective. Earlier SEMANTIC_PROTOCOL.md and QUICKDRAW_PROTOCOL.md are historical proposals, not the active primary experiment. A separate3D visualization remains a later request, not part of the current run.
+The two editorial manuscripts are [STATE_TRANSFER_PAPER.md](experiments/state_transfer/docs/STATE_TRANSFER_PAPER.md) and [STATE_TRANSFER_PAPER_V2.md](experiments/state_transfer/docs/STATE_TRANSFER_PAPER_V2.md). Five globally noun-held-out folds cover 992 images, 51 noun labels, and 496 queries. Frozen BLOOMZ/DINOv2 embeddings are connected by a supervised ridge translator fitted separately in each fold.
 
-## Completed natural-state study
+First-result state-and-noun success is 38.7%, versus 20.9% for source-only similarity and 42.1% for direct target-text retrieval. The primary macro AP gain over no shift is +0.08516 with adjusted 98.75% interval [+0.02936, +0.14707]; all four planned AP contrasts are positive. Noun retention falls from 86.6% to 79.4%, so the full success criterion fails. Post-primary constrained scaling and identity-subspace projection do not fix the preservation guardrail.
 
-The active paper is `STATE_TRANSFER_PAPER.md`, with a PDF at `output/pdf/state_transfer_paper.pdf`. Five named state relations were run on992 natural images across51 noun labels using globally noun-held-out folds. The primary macro AP gain is+.08516 with adjusted98.75% interval[+.02936,+.14707], and all four planned AP contrasts are positive. Noun-top1 falls by7.20 percentage points, so the full success criterion fails. Post-primary constrained-scaling and identity-subspace projection do not fix the preservation guardrail. Primary analysis sources match their pre-extraction lock; these follow-ups are clearly exploratory.
+The historical primary sources and locks remain under `experiments/state_transfer/results/`. Follow-ups are exploratory. Weak released labels, related noun categories, and unknown image-source dependence limit the claims; these are independent photographs, not matched state transitions.
 
-Next substantive direction: state transfer that preserves noun information, evaluated on independently verified states with source/taxonomy separation and broader galleries. Do not expand the abandoned color benchmark. A separate3D visualization remains deferred; high-dimensional natural-state vectors are saved for it.
+## Next research questions
+
+Investigate state transfer that preserves noun information on independently verified labels, with source/taxonomy separation and broader galleries. These are follow-up directions, not completed experiments. A separate 3D visualization remains deferred; high-dimensional natural-state vectors are saved for it.
+
+## Retired and historical work
+
+The WIT replication, robustness analyses, and arbitrary endpoint-difference pilot are earlier completed stages. Their reports and protocols remain as historical records.
+
+The user retired red → blue as the main task on October 15, 2026. Main Quick, Draw! extraction was interrupted before test scoring. Preserve partial caches and pilot results; do not resume or present that benchmark as the main study without a new instruction. SEMANTIC_PROTOCOL.md, QUICKDRAW_PROTOCOL.md, and CONCEPT_TRANSFER_NEXT.md describe earlier proposals.
