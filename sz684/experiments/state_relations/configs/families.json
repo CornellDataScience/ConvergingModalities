@@ -1,0 +1,13 @@
+{
+  "interior": ["bathroom", "kitchen", "room", "shower", "basement", "floor"],
+  "textiles": ["carpet", "clothes"],
+  "water_sources": ["pool", "water", "pond", "well"],
+  "meat": ["beef", "chicken", "meat"],
+  "seafood": ["fish", "salmon", "seafood"],
+  "produce": ["vegetable", "salad"],
+  "fruit": ["apple", "banana", "berry", "fig", "fruit", "lemon", "orange", "pear", "persimmon"],
+  "baked_goods": ["bread", "cookie", "pie", "pizza"],
+  "frozen_water": ["ice", "snow"],
+  "soil": ["clay", "dirt", "ground", "mud", "sand"],
+  "vegetation": ["bush", "forest", "moss"]
+}
